@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from './components/frontend/Home';
 import About from './components/frontend/About';
 import './assets/css/style.scss';
+import Services from './components/frontend/Services';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -12,8 +13,9 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home/>} />
-          <Route path="/about" element={<About/>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path='/services' element={<Services />} />
         </Routes>
       </BrowserRouter>
     </>
