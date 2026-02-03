@@ -1,0 +1,7 @@
+PS C:\xampp\htdocs\construction\construction-app\backend> php artisan db:seed
+
+   INFO  Seeding database.  
+
+PS C:\xampp\htdocs\construction\construction-app\backend> php artisan make:controller admin\DashboardController
+
+   INFO  Controller [C:\xampp\htdocs\construction\construction-app\backend\app\Http\Controllers\admin\DashboardController.php] created successfully.
