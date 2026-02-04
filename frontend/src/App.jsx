@@ -11,6 +11,7 @@ import Blog from './components/frontend/Blog';
 import ContactUs from './components/frontend/ContactUs';
 import Login from './components/backend/Login';
 import Dashboard from './components/backend/Dashboard';
+import RequireAuth from './components/common/RequireAuth';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -25,7 +26,8 @@ function App() {
           <Route path='/blogs' element={<Blog />} />
           <Route path='/contact' element={<ContactUs />} />
           <Route path='/admin/login' element={<Login />} />
-          <Route path='/admin/dashboard' element={<Dashboard />} />
+          <Route path='/admin/dashboard' element={
+            <RequireAuth><Dashboard /></RequireAuth>} />
         </Routes>
       </BrowserRouter>
     </>

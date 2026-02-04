@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import axios from 'axios'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -7,8 +7,10 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import Header from '../common/Header'
 import Footer from '../common/Footer'
+import { AuthContext } from './context/Auth'
 
 const Login = () => {
+    const { login } = useContext(AuthContext);
     const navigate = useNavigate()
 
     const {
@@ -25,18 +27,19 @@ const Login = () => {
             )
 
             if (response.data.status === true) {
-                const authData = {
+                const userInfo = {
                     token: response.data.token,
                     id: response.data.id
                 }
 
                 // Store as single key
-                localStorage.setItem('auth', JSON.stringify(authData))
+                localStorage.setItem('userInfo', JSON.stringify(userInfo))
 
                 toast.success('Login successful 🎉')
 
                 // Redirect to dashboard
                 setTimeout(() => {
+                    login(userInfo);
                     navigate('/admin/dashboard')
                 }, 1000)
 
