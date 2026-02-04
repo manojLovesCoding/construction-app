@@ -9,6 +9,8 @@ import Services from './components/frontend/Services';
 import Projects from './components/frontend/Projects';
 import Blog from './components/frontend/Blog';
 import ContactUs from './components/frontend/ContactUs';
+import Login from './components/backend/Login';
+import Dashboard from './components/backend/Dashboard';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -22,6 +24,8 @@ function App() {
           <Route path='/projects' element={<Projects />} />
           <Route path='/blogs' element={<Blog />} />
           <Route path='/contact' element={<ContactUs />} />
+          <Route path='/admin/login' element={<Login />} />
+          <Route path='/admin/dashboard' element={<Dashboard />} />
         </Routes>
       </BrowserRouter>
     </>
