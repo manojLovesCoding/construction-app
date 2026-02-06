@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Header from '../../common/Header'
 import Sidebar from '../../common/Sidebar'
 import Footer from '../../common/Footer'
 import { apiUrl, token } from '../../common/http'
-import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { useForm } from 'react-hook-form'
+import JoditEditor from 'jodit-react'
 
 const Show = () => {
     const [services, setServices] = useState([])
+    const [showModal, setShowModal] = useState(false)
+    const [content, setContent] = useState('') // For Jodit content
+    const editor = useRef(null)
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm()
 
     const fetchServices = async () => {
         try {
@@ -15,13 +26,11 @@ const Show = () => {
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    Authorization: `Bearer ${token()}`
-                }
+                    Authorization: `Bearer ${token()}`,
+                },
             })
-
             setServices(res.data.data)
             console.log(res.data.data)
-
         } catch (error) {
             console.error('Error fetching services:', error)
         }
@@ -31,30 +40,53 @@ const Show = () => {
         fetchServices()
     }, [])
 
+    const onSubmit = async (data) => {
+        if (content.trim() === '') {
+            alert('Content is required')
+            return
+        }
+
+        const postData = { ...data, content }
+
+        try {
+            await axios.post(`${apiUrl}services`, postData, {
+                headers: {
+                    Authorization: `Bearer ${token()}`,
+                },
+            })
+            fetchServices() // refresh list
+            reset() // clear form
+            setContent('') // reset content
+            setShowModal(false) // close modal
+        } catch (error) {
+            console.error('Error creating service:', error)
+        }
+    }
+
     return (
         <>
             <Header />
 
             <main className="min-h-[80vh] bg-gray-100 px-6 py-6">
                 <div className="flex gap-6">
-
+                    {/* Sidebar */}
                     <Sidebar />
 
+                    {/* Services Content */}
                     <section className="flex-1 bg-white shadow rounded p-6">
-
+                        {/* Header */}
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-semibold text-gray-700">
-                                Services
-                            </h2>
+                            <h2 className="text-xl font-semibold text-gray-700">Services</h2>
 
-                            <Link
-                                to="/admin/services/create"
+                            <button
+                                onClick={() => setShowModal(true)}
                                 className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded text-sm"
                             >
                                 CREATE
-                            </Link>
+                            </button>
                         </div>
 
+                        {/* Table */}
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
@@ -69,17 +101,18 @@ const Show = () => {
 
                                 <tbody>
                                     {services.length > 0 ? (
-                                        services.map(service => (
+                                        services.map((service) => (
                                             <tr key={service.id} className="text-sm">
                                                 <td className="p-3 border">{service.id}</td>
+
                                                 <td className="p-3 border font-medium text-gray-700">
                                                     {service.title}
                                                 </td>
-                                                <td className="p-3 border text-gray-600">
-                                                    {service.slug}
-                                                </td>
+
+                                                <td className="p-3 border text-gray-600">{service.slug}</td>
+
                                                 <td className="p-3 border">
-                                                    {service.status === "1" ? (
+                                                    {service.status === '1' ? (
                                                         <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
                                                             Active
                                                         </span>
@@ -89,6 +122,7 @@ const Show = () => {
                                                         </span>
                                                     )}
                                                 </td>
+
                                                 <td className="p-3 border">
                                                     <div className="flex justify-center gap-3">
                                                         <button className="text-blue-600 hover:underline">
@@ -111,12 +145,129 @@ const Show = () => {
                                 </tbody>
                             </table>
                         </div>
-
                     </section>
                 </div>
             </main>
 
             <Footer />
+
+            {/* Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white w-full max-w-3xl rounded shadow-lg max-h-[80vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center px-6 py-4 border-b">
+                            <h3 className="text-lg font-semibold text-gray-700">
+                                Services / Create
+                            </h3>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="bg-pink-500 text-white px-3 py-1 rounded text-sm"
+                            >
+                                BACK
+                            </button>
+                        </div>
+
+                        {/* Modal Form */}
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="p-6 space-y-4">
+                                {/* Name */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">
+                                        Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded px-3 py-2"
+                                        {...register('title', {
+                                            required: 'Name is required',
+                                            minLength: {
+                                                value: 3,
+                                                message: 'Name must be at least 3 characters',
+                                            },
+                                        })}
+                                    />
+                                    {errors.title && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Slug */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">
+                                        Slug
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded px-3 py-2"
+                                        {...register('slug', { required: 'Slug is required' })}
+                                    />
+                                    {errors.slug && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.slug.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Short Description */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">
+                                        Short Description
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        className="w-full border rounded px-3 py-2"
+                                        {...register('short_desc', { required: 'Short description is required' })}
+                                    />
+                                    {errors.short_desc && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.short_desc.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Content (Jodit Editor) */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Content</label>
+                                    <JoditEditor
+                                        ref={editor}
+                                        value={content}
+                                        onChange={(newContent) => setContent(newContent)}
+                                    />
+                                    {content.trim() === '' && (
+                                        <p className="text-red-500 text-xs mt-1">Content is required</p>
+                                    )}
+                                </div>
+
+                                {/* Status */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                    <select
+                                        className="w-full border rounded px-3 py-2"
+                                        {...register('status', { required: 'Status is required' })}
+                                        defaultValue=""
+                                    >
+                                        <option value="" disabled>
+                                            Select status
+                                        </option>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                    {errors.status && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="px-6 py-4 border-t flex justify-end">
+                                <button
+                                    type="submit"
+                                    className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded"
+                                >
+                                    SUBMIT
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     )
 }
