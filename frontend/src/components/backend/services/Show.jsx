@@ -6,11 +6,16 @@ import { apiUrl, token } from '../../common/http'
 import axios from 'axios'
 import { useForm } from 'react-hook-form'
 import JoditEditor from 'jodit-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 
 const Show = () => {
     const [services, setServices] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [content, setContent] = useState('') // For Jodit content
+    const [isDisable, setIsDisable] = useState(false)
+    const [imageId, setImageId] = useState(null)
     const editor = useRef(null)
 
     const {
@@ -46,7 +51,7 @@ const Show = () => {
             return
         }
 
-        const postData = { ...data, content }
+        const postData = { ...data, content, imageId }
 
         try {
             await axios.post(`${apiUrl}services`, postData, {
@@ -63,9 +68,39 @@ const Show = () => {
         }
     }
 
+    const handleFile = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('image', file)
+
+        try {
+            const res = await axios.post(`${apiUrl}temp-images`, formData, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token()}`,
+                    // ❌ don’t manually set Content-Type for FormData
+                },
+            })
+
+            if (res.data.status === false) {
+                toast.error(res.data.errors.image[0])
+            } else {
+                setImageId(res.data.data.id)
+                toast.success('Image uploaded successfully!')
+            }
+        } catch (error) {
+            console.error('Image upload failed:', error)
+            toast.error('Something went wrong while uploading the image')
+        }
+    }
+
+
     return (
         <>
             <Header />
+            <ToastContainer />
 
             <main className="min-h-[80vh] bg-gray-100 px-6 py-6">
                 <div className="flex gap-6">
@@ -157,9 +192,7 @@ const Show = () => {
                     <div className="bg-white w-full max-w-3xl rounded shadow-lg max-h-[80vh] overflow-y-auto">
                         {/* Modal Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b">
-                            <h3 className="text-lg font-semibold text-gray-700">
-                                Services / Create
-                            </h3>
+                            <h3 className="text-lg font-semibold text-gray-700">Services / Create</h3>
                             <button
                                 onClick={() => setShowModal(false)}
                                 className="bg-pink-500 text-white px-3 py-1 rounded text-sm"
@@ -169,22 +202,46 @@ const Show = () => {
                         </div>
 
                         {/* Modal Form */}
-                        <form onSubmit={handleSubmit(onSubmit)}>
+                        <form
+                            onSubmit={handleSubmit(async (data) => {
+                                if (!content.trim()) {
+                                    toast.error('Content is required');
+                                    return;
+                                }
+
+                                setIsDisable(true);
+
+                                const postData = { ...data, content, imageId };
+
+                                try {
+                                    await axios.post(`${apiUrl}services`, postData, {
+                                        headers: { Authorization: `Bearer ${token()}` },
+                                    });
+
+                                    toast.success('Service created successfully!');
+                                    fetchServices(); // refresh list
+                                    reset(); // reset form fields
+                                    setContent(''); // reset editor
+                                    setImageId(null); // reset image
+                                    setShowModal(false); // close modal
+                                } catch (error) {
+                                    console.error('Error creating service:', error);
+                                    toast.error('Failed to create service');
+                                } finally {
+                                    setIsDisable(false);
+                                }
+                            })}
+                        >
                             <div className="p-6 space-y-4">
                                 {/* Name */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600">
-                                        Name
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600">Name</label>
                                     <input
                                         type="text"
                                         className="w-full border rounded px-3 py-2"
                                         {...register('title', {
                                             required: 'Name is required',
-                                            minLength: {
-                                                value: 3,
-                                                message: 'Name must be at least 3 characters',
-                                            },
+                                            minLength: { value: 3, message: 'Name must be at least 3 characters' },
                                         })}
                                     />
                                     {errors.title && (
@@ -194,9 +251,7 @@ const Show = () => {
 
                                 {/* Slug */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600">
-                                        Slug
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600">Slug</label>
                                     <input
                                         type="text"
                                         className="w-full border rounded px-3 py-2"
@@ -209,9 +264,7 @@ const Show = () => {
 
                                 {/* Short Description */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600">
-                                        Short Description
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600">Short Description</label>
                                     <textarea
                                         rows="3"
                                         className="w-full border rounded px-3 py-2"
@@ -230,9 +283,41 @@ const Show = () => {
                                         value={content}
                                         onChange={(newContent) => setContent(newContent)}
                                     />
-                                    {content.trim() === '' && (
-                                        <p className="text-red-500 text-xs mt-1">Content is required</p>
-                                    )}
+                                </div>
+
+                                {/* Image Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Image</label>
+                                    <input
+                                        type="file"
+                                        className="w-full border rounded px-3 py-2"
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            const formData = new FormData();
+                                            formData.append('image', file);
+
+                                            try {
+                                                const res = await axios.post(`${apiUrl}temp-images`, formData, {
+                                                    headers: {
+                                                        Accept: 'application/json',
+                                                        Authorization: `Bearer ${token()}`,
+                                                    },
+                                                });
+
+                                                if (res.data.status === false) {
+                                                    toast.error(res.data.errors.image[0]);
+                                                } else {
+                                                    setImageId(res.data.data.id);
+                                                    toast.success('Image uploaded successfully!');
+                                                }
+                                            } catch (error) {
+                                                console.error('Image upload failed:', error);
+                                                toast.error('Something went wrong while uploading the image');
+                                            }
+                                        }}
+                                    />
                                 </div>
 
                                 {/* Status */}
@@ -259,15 +344,20 @@ const Show = () => {
                             <div className="px-6 py-4 border-t flex justify-end">
                                 <button
                                     type="submit"
-                                    className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded"
+                                    disabled={isDisable || !content.trim()}
+                                    className={`px-6 py-2 rounded text-white ${isDisable || !content.trim()
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-pink-500 hover:bg-pink-600'
+                                        }`}
                                 >
-                                    SUBMIT
+                                    {isDisable ? 'Submitting...' : 'SUBMIT'}
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
         </>
     )
 }
