@@ -1,101 +1,131 @@
-import React, { useEffect, useState, useRef } from 'react'
-import Header from '../../common/Header'
-import Sidebar from '../../common/Sidebar'
-import Footer from '../../common/Footer'
-import { apiUrl, token } from '../../common/http'
-import axios from 'axios'
-import { useForm } from 'react-hook-form'
-import JoditEditor from 'jodit-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-
+import React, { useEffect, useState, useRef } from 'react';
+import Header from '../../common/Header';
+import Sidebar from '../../common/Sidebar';
+import Footer from '../../common/Footer';
+import { apiUrl, token } from '../../common/http';
+import axios from 'axios';
+import { useForm } from 'react-hook-form';
+import JoditEditor from 'jodit-react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Show = () => {
-    const [services, setServices] = useState([])
-    const [showModal, setShowModal] = useState(false)
-    const [content, setContent] = useState('') // For Jodit content
-    const [isDisable, setIsDisable] = useState(false)
-    const [imageId, setImageId] = useState(null)
-    const editor = useRef(null)
+    const [services, setServices] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [content, setContent] = useState('');
+    const [isDisable, setIsDisable] = useState(false);
+    const [imageId, setImageId] = useState(null);
+    const [editingService, setEditingService] = useState(null); // Track edit
+    const editor = useRef(null);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-    } = useForm()
+    const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
     const fetchServices = async () => {
         try {
             const res = await axios.get(`${apiUrl}services`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    Authorization: `Bearer ${token()}`,
-                },
-            })
-            setServices(res.data.data)
-            console.log(res.data.data)
+                headers: { Authorization: `Bearer ${token()}` },
+            });
+            setServices(res.data.data);
         } catch (error) {
-            console.error('Error fetching services:', error)
+            console.error('Error fetching services:', error);
         }
-    }
+    };
 
     useEffect(() => {
-        fetchServices()
-    }, [])
+        fetchServices();
+    }, []);
 
-    const onSubmit = async (data) => {
-        if (content.trim() === '') {
-            alert('Content is required')
-            return
-        }
+    const handleFileUpload = async (file) => {
+        if (!file) return;
 
-        const postData = { ...data, content, imageId }
-
-        try {
-            await axios.post(`${apiUrl}services`, postData, {
-                headers: {
-                    Authorization: `Bearer ${token()}`,
-                },
-            })
-            fetchServices() // refresh list
-            reset() // clear form
-            setContent('') // reset content
-            setShowModal(false) // close modal
-        } catch (error) {
-            console.error('Error creating service:', error)
-        }
-    }
-
-    const handleFile = async (e) => {
-        const file = e.target.files[0]
-        if (!file) return
-
-        const formData = new FormData()
-        formData.append('image', file)
+        const formData = new FormData();
+        formData.append('image', file);
 
         try {
             const res = await axios.post(`${apiUrl}temp-images`, formData, {
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${token()}`,
-                    // ❌ don’t manually set Content-Type for FormData
+                    Accept: 'application/json',
+                    Authorization: `Bearer ${token()}`,
                 },
-            })
+            });
 
             if (res.data.status === false) {
-                toast.error(res.data.errors.image[0])
+                toast.error(res.data.errors.image[0]);
             } else {
-                setImageId(res.data.data.id)
-                toast.success('Image uploaded successfully!')
+                setImageId(res.data.data.id);
+                toast.success('Image uploaded successfully!');
             }
         } catch (error) {
-            console.error('Image upload failed:', error)
-            toast.error('Something went wrong while uploading the image')
+            console.error('Image upload failed:', error);
+            toast.error('Something went wrong while uploading the image');
         }
-    }
+    };
 
+    const handleEdit = (service) => {
+        setEditingService(service);
+        reset({
+            title: service.title,
+            slug: service.slug,
+            short_desc: service.short_desc,
+            status: service.status,
+        });
+        setContent(service.content);
+        setImageId(service.imageId || null);
+        setShowModal(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this service?')) return;
+
+        try {
+            await axios.delete(`${apiUrl}services/${id}`, {
+                headers: { Authorization: `Bearer ${token()}` },
+            });
+            toast.success('Service deleted!');
+            fetchServices();
+        } catch (error) {
+            toast.error('Failed to delete service');
+            console.error(error);
+        }
+    };
+
+    const onSubmit = async (data) => {
+        if (!content.trim()) {
+            toast.error('Content is required');
+            return;
+        }
+
+        setIsDisable(true);
+        const postData = { ...data, content, imageId };
+
+        try {
+            if (editingService) {
+                // Update existing service
+                await axios.put(`${apiUrl}services/${editingService.id}`, postData, {
+                    headers: { Authorization: `Bearer ${token()}` },
+                });
+                toast.success('Service updated successfully!');
+            } else {
+                // Create new service
+                await axios.post(`${apiUrl}services`, postData, {
+                    headers: { Authorization: `Bearer ${token()}` },
+                });
+                toast.success('Service created successfully!');
+            }
+
+            fetchServices();
+            reset();
+            setContent('');
+            setImageId(null);
+            setEditingService(null);
+            setShowModal(false);
+        } catch (error) {
+            console.error('Error submitting service:', error);
+            toast.error('Failed to save service');
+        } finally {
+            setIsDisable(false);
+        }
+    };
 
     return (
         <>
@@ -104,24 +134,25 @@ const Show = () => {
 
             <main className="min-h-[80vh] bg-gray-100 px-6 py-6">
                 <div className="flex gap-6">
-                    {/* Sidebar */}
                     <Sidebar />
 
-                    {/* Services Content */}
                     <section className="flex-1 bg-white shadow rounded p-6">
-                        {/* Header */}
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-semibold text-gray-700">Services</h2>
-
                             <button
-                                onClick={() => setShowModal(true)}
+                                onClick={() => {
+                                    setEditingService(null);
+                                    reset();
+                                    setContent('');
+                                    setImageId(null);
+                                    setShowModal(true);
+                                }}
                                 className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded text-sm"
                             >
                                 CREATE
                             </button>
                         </div>
 
-                        {/* Table */}
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
@@ -133,19 +164,13 @@ const Show = () => {
                                         <th className="p-3 border text-center">Action</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
                                     {services.length > 0 ? (
                                         services.map((service) => (
                                             <tr key={service.id} className="text-sm">
                                                 <td className="p-3 border">{service.id}</td>
-
-                                                <td className="p-3 border font-medium text-gray-700">
-                                                    {service.title}
-                                                </td>
-
+                                                <td className="p-3 border font-medium text-gray-700">{service.title}</td>
                                                 <td className="p-3 border text-gray-600">{service.slug}</td>
-
                                                 <td className="p-3 border">
                                                     {service.status === '1' ? (
                                                         <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
@@ -157,13 +182,18 @@ const Show = () => {
                                                         </span>
                                                     )}
                                                 </td>
-
                                                 <td className="p-3 border">
                                                     <div className="flex justify-center gap-3">
-                                                        <button className="text-blue-600 hover:underline">
+                                                        <button
+                                                            className="text-blue-600 hover:underline"
+                                                            onClick={() => handleEdit(service)}
+                                                        >
                                                             Edit
                                                         </button>
-                                                        <button className="text-red-600 hover:underline">
+                                                        <button
+                                                            className="text-red-600 hover:underline"
+                                                            onClick={() => handleDelete(service.id)}
+                                                        >
                                                             Delete
                                                         </button>
                                                     </div>
@@ -190,9 +220,10 @@ const Show = () => {
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white w-full max-w-3xl rounded shadow-lg max-h-[80vh] overflow-y-auto">
-                        {/* Modal Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b">
-                            <h3 className="text-lg font-semibold text-gray-700">Services / Create</h3>
+                            <h3 className="text-lg font-semibold text-gray-700">
+                                {editingService ? 'Edit Service' : 'Create Service'}
+                            </h3>
                             <button
                                 onClick={() => setShowModal(false)}
                                 className="bg-pink-500 text-white px-3 py-1 rounded text-sm"
@@ -201,39 +232,8 @@ const Show = () => {
                             </button>
                         </div>
 
-                        {/* Modal Form */}
-                        <form
-                            onSubmit={handleSubmit(async (data) => {
-                                if (!content.trim()) {
-                                    toast.error('Content is required');
-                                    return;
-                                }
-
-                                setIsDisable(true);
-
-                                const postData = { ...data, content, imageId };
-
-                                try {
-                                    await axios.post(`${apiUrl}services`, postData, {
-                                        headers: { Authorization: `Bearer ${token()}` },
-                                    });
-
-                                    toast.success('Service created successfully!');
-                                    fetchServices(); // refresh list
-                                    reset(); // reset form fields
-                                    setContent(''); // reset editor
-                                    setImageId(null); // reset image
-                                    setShowModal(false); // close modal
-                                } catch (error) {
-                                    console.error('Error creating service:', error);
-                                    toast.error('Failed to create service');
-                                } finally {
-                                    setIsDisable(false);
-                                }
-                            })}
-                        >
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="p-6 space-y-4">
-                                {/* Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Name</label>
                                     <input
@@ -249,7 +249,6 @@ const Show = () => {
                                     )}
                                 </div>
 
-                                {/* Slug */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Slug</label>
                                     <input
@@ -262,7 +261,6 @@ const Show = () => {
                                     )}
                                 </div>
 
-                                {/* Short Description */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Short Description</label>
                                     <textarea
@@ -275,7 +273,6 @@ const Show = () => {
                                     )}
                                 </div>
 
-                                {/* Content (Jodit Editor) */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Content</label>
                                     <JoditEditor
@@ -285,42 +282,15 @@ const Show = () => {
                                     />
                                 </div>
 
-                                {/* Image Upload */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Image</label>
                                     <input
                                         type="file"
                                         className="w-full border rounded px-3 py-2"
-                                        onChange={async (e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-
-                                            const formData = new FormData();
-                                            formData.append('image', file);
-
-                                            try {
-                                                const res = await axios.post(`${apiUrl}temp-images`, formData, {
-                                                    headers: {
-                                                        Accept: 'application/json',
-                                                        Authorization: `Bearer ${token()}`,
-                                                    },
-                                                });
-
-                                                if (res.data.status === false) {
-                                                    toast.error(res.data.errors.image[0]);
-                                                } else {
-                                                    setImageId(res.data.data.id);
-                                                    toast.success('Image uploaded successfully!');
-                                                }
-                                            } catch (error) {
-                                                console.error('Image upload failed:', error);
-                                                toast.error('Something went wrong while uploading the image');
-                                            }
-                                        }}
+                                        onChange={(e) => handleFileUpload(e.target.files[0])}
                                     />
                                 </div>
 
-                                {/* Status */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Status</label>
                                     <select
@@ -328,9 +298,7 @@ const Show = () => {
                                         {...register('status', { required: 'Status is required' })}
                                         defaultValue=""
                                     >
-                                        <option value="" disabled>
-                                            Select status
-                                        </option>
+                                        <option value="" disabled>Select status</option>
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
                                     </select>
@@ -340,15 +308,15 @@ const Show = () => {
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
                             <div className="px-6 py-4 border-t flex justify-end">
                                 <button
                                     type="submit"
                                     disabled={isDisable || !content.trim()}
-                                    className={`px-6 py-2 rounded text-white ${isDisable || !content.trim()
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-pink-500 hover:bg-pink-600'
-                                        }`}
+                                    className={`px-6 py-2 rounded text-white ${
+                                        isDisable || !content.trim()
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-pink-500 hover:bg-pink-600'
+                                    }`}
                                 >
                                     {isDisable ? 'Submitting...' : 'SUBMIT'}
                                 </button>
@@ -357,9 +325,8 @@ const Show = () => {
                     </div>
                 </div>
             )}
-
         </>
-    )
-}
+    );
+};
 
-export default Show
+export default Show;
