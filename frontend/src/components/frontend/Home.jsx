@@ -1,11 +1,16 @@
 
 
+import { useEffect, useState } from "react";
 import aboutImg from "../../assets/images/about-us.jpg";
 import About from "../common/About";
 import Footer from "../common/Footer";
 import Header from "../common/Header";
+import { apiUrl } from "../common/http";
+import LatestServices from "../common/LatestServices";
 
 const Home = () => {
+  
+
   return (
     <>
       <Header />
@@ -47,7 +52,11 @@ const Home = () => {
         </section>
 
         {/* About Section */}
-        <About/>
+        <About />
+
+        {/* Services Section */}
+        <LatestServices/>
+
       </main>
 
       <Footer />
