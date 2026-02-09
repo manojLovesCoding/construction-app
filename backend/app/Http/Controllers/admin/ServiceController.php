@@ -180,6 +180,10 @@ class ServiceController extends Controller
         if ($service == null) {
             return response()->json(['status' => false, 'message' => 'Service not found']);
         }
+
+        File::delete(public_path('uploads/services/large/' . $service->image));
+        File::delete(public_path('uploads/services/small/' . $service->image));
+        
         $service->delete();
         return response()->json(['status' => true, 'message' => 'Service deleted successfully']);
     }
