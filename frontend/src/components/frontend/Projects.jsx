@@ -1,100 +1,99 @@
-import React from 'react'
-import Header from '../common/Header'
-import Footer from '../common/Footer'
-import Hero from '../common/Hero'
+import { useEffect, useState } from 'react';
+import Header from '../common/Header';
+import Footer from '../common/Footer';
+import Hero from '../common/Hero';
+import { apiUrl, fileUrl } from '../common/http';
 
-const Projects = () => {
-    const projects = [
-        {
-            id: 1,
-            title: 'Residential Villas',
-            description:
-                'Luxury residential villas designed with precision, comfort, and modern architecture.',
-            image: 'https://picsum.photos/600/400?random=1',
-        },
-        {
-            id: 2,
-            title: 'Commercial Complex',
-            description:
-                'High-quality commercial spaces built to support growing businesses.',
-            image: 'https://picsum.photos/600/400?random=2',
-        },
-        {
-            id: 3,
-            title: 'Industrial Facility',
-            description:
-                'Robust and efficient industrial constructions meeting global standards.',
-            image: 'https://picsum.photos/600/400?random=3',
-        },
-        {
-            id: 4,
-            title: 'Modern Apartments',
-            description:
-                'Contemporary apartment buildings with smart space planning.',
-            image: 'https://picsum.photos/600/400?random=4',
-        },
-        {
-            id: 5,
-            title: 'Office Tower',
-            description:
-                'State-of-the-art office tower built for productivity and efficiency.',
-            image: 'https://picsum.photos/600/400?random=5',
-        },
-        {
-            id: 6,
-            title: 'Warehouse Project',
-            description:
-                'Large-scale warehouse facility with optimized logistics flow.',
-            image: 'https://picsum.photos/600/400?random=6',
-        },
-    ]
+function Projects() {
+    const [projects, setProjects] = useState([]);
+
+    const fetchAllProjects = async () => {
+        try {
+            const res = await fetch(apiUrl + 'get-projects', {
+                method: 'GET',
+            });
+            const result = await res.json();
+            setProjects(result.data);
+        } catch (error) {
+            console.error('Failed to fetch projects', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllProjects();
+    }, []);
 
     return (
         <>
             <Header />
 
-            <main>
-                <Hero
-                    preHeading="Quality. Integrity. Value."
-                    heading="Our Projects"
-                    text="We offer a diverse array of construction services, spanning residential, commercial, and industrial projects."
-                />
+            <Hero
+                preHeading="Excellence. Quality. Innovation."
+                heading="Projects"
+                text="Take a look at our diverse portfolio of construction projects across residential, commercial, and industrial sectors."
+            />
 
-                {/* Projects Section */}
-                <section className="py-20 bg-gray-50">
-                    <div className="max-w-7xl mx-auto px-4">
-                        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                            {projects.map((project) => (
+            <section className="py-20 bg-gray-50">
+                <div className="container mx-auto px-6">
+                    {/* Section Header */}
+                    <div className="text-center max-w-2xl mx-auto mb-14">
+                        <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
+                            Our Work
+                        </span>
+                        <h2 className="mt-2 text-3xl md:text-4xl font-extrabold text-gray-900">
+                            Recent Construction Projects
+                        </h2>
+                        <p className="mt-4 text-gray-600">
+                            We showcase our expertise through a wide range of projects, demonstrating our commitment to quality and innovation.
+                        </p>
+                    </div>
+
+                    {/* Projects Grid */}
+                    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        {projects.length > 0 ? (
+                            projects.map((project) => (
                                 <div
                                     key={project.id}
-                                    className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition duration-300"
+                                    className="bg-white rounded-lg shadow-md overflow-hidden group"
                                 >
-                                    <div className="h-56 overflow-hidden">
+                                    <div className="relative">
                                         <img
-                                            src={project.image}
+                                            src={
+                                                project.image
+                                                    ? `${fileUrl}uploads/projects/small/${project.image}`
+                                                    : '/default-project.jpg' // fallback image
+                                            }
                                             alt={project.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                            className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
+                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition"></div>
                                     </div>
 
                                     <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">
                                             {project.title}
                                         </h3>
-                                        <p className="text-gray-600 text-sm">
-                                            {project.description}
+                                        <p className="text-gray-600 mb-4">
+                                            {project.short_desc || 'No description available.'}
                                         </p>
+                                        <button className="text-blue-600 font-semibold hover:text-blue-700 transition">
+                                            Learn More →
+                                        </button>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            ))
+                        ) : (
+                            <p className="col-span-full text-center text-gray-500">
+                                No projects found.
+                            </p>
+                        )}
                     </div>
-                </section>
-            </main>
+                </div>
+            </section>
 
             <Footer />
         </>
-    )
+    );
 }
 
-export default Projects
+export default Projects;

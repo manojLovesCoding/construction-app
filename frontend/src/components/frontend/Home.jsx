@@ -7,6 +7,7 @@ import Footer from "../common/Footer";
 import Header from "../common/Header";
 import { apiUrl } from "../common/http";
 import LatestServices from "../common/LatestServices";
+import LatestProjects from "../common/LatestProjects";
 
 const Home = () => {
   
@@ -56,6 +57,9 @@ const Home = () => {
 
         {/* Services Section */}
         <LatestServices/>
+
+        {/* Projects Section */}
+        <LatestProjects />
 
       </main>
 
