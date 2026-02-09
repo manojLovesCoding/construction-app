@@ -29,6 +29,10 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'slug' => Str::slug($request->slug),
+        ]);
+
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'slug' => 'required|unique:services,slug',
@@ -47,7 +51,7 @@ class ServiceController extends Controller
         $model->save();
 
         if ($request->imageId > 0) {
-           
+
             $tempImage = TempImage::find($request->imageId);
             if ($tempImage != null) {
                 $extArray = explode('.', $tempImage->name);
@@ -108,6 +112,9 @@ class ServiceController extends Controller
             return response()->json(['status' => false, 'message' => 'Service not found']);
         }
 
+        $request->merge([
+            'slug' => Str::slug($request->slug),
+        ]);
 
         $validator = Validator::make($request->all(), [
             'title' => 'required',
