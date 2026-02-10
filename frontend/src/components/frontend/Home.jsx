@@ -8,6 +8,7 @@ import Header from "../common/Header";
 import { apiUrl } from "../common/http";
 import LatestServices from "../common/LatestServices";
 import LatestProjects from "../common/LatestProjects";
+import LatestArticles from "../common/LatestArticles.JSX";
 
 const Home = () => {
   
@@ -60,6 +61,9 @@ const Home = () => {
 
         {/* Projects Section */}
         <LatestProjects />
+
+        {/* Articles Section */}
+        <LatestArticles />
 
       </main>
 

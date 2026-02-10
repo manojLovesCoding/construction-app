@@ -14,6 +14,7 @@ import Dashboard from './components/backend/Dashboard';
 import RequireAuth from './components/common/RequireAuth';
 import { default as ShowServices } from './components/backend/services/Show';
 import { default as ShowProjects } from './components/backend/projects/Show';
+import { default as ShowArticles } from './components/backend/articles/Show';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -34,6 +35,8 @@ function App() {
             <RequireAuth><ShowServices /></RequireAuth>} />
           <Route path='/admin/projects' element={
             <RequireAuth><ShowProjects /></RequireAuth>} />
+            <Route path='/admin/articles' element={
+            <RequireAuth><ShowArticles /></RequireAuth>} /> 
         </Routes>
       </BrowserRouter>
     </>
