@@ -2,6 +2,7 @@ import Footer from "../common/Footer";
 import Header from "../common/Header";
 import { default as AboutNew } from "../common/About";
 import Hero from "../common/Hero";
+import LatestTestimonials from "../common/LatestTestimonials";
 
 const About = () => {
   return (
@@ -79,7 +80,8 @@ const About = () => {
           </div>
         </section>
 
-
+        {/* Testimonials Section */}
+        <LatestTestimonials limit={4} />
       </main>
       <Footer />
     </>

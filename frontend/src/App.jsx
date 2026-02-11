@@ -15,6 +15,8 @@ import RequireAuth from './components/common/RequireAuth';
 import { default as ShowServices } from './components/backend/services/Show';
 import { default as ShowProjects } from './components/backend/projects/Show';
 import { default as ShowArticles } from './components/backend/articles/Show';
+import { default as ShowTestimonials } from './components/backend/testimonials/Show';
+import Testimonials from './components/frontend/Testimonials';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -28,6 +30,7 @@ function App() {
           <Route path='/projects' element={<Projects />} />
           <Route path='/blogs' element={<Blog />} />
           <Route path='/contact' element={<ContactUs />} />
+          <Route path='/testimonials' element={<Testimonials />} />
           <Route path='/admin/login' element={<Login />} />
           <Route path='/admin/dashboard' element={
             <RequireAuth><Dashboard /></RequireAuth>} />
@@ -35,8 +38,11 @@ function App() {
             <RequireAuth><ShowServices /></RequireAuth>} />
           <Route path='/admin/projects' element={
             <RequireAuth><ShowProjects /></RequireAuth>} />
-            <Route path='/admin/articles' element={
-            <RequireAuth><ShowArticles /></RequireAuth>} /> 
+          <Route path='/admin/articles' element={
+            <RequireAuth><ShowArticles /></RequireAuth>} />
+          <Route path='/admin/testimonials' element={
+            <RequireAuth><ShowTestimonials /></RequireAuth>} />
+            
         </Routes>
       </BrowserRouter>
     </>

@@ -45,6 +45,13 @@ const Sidebar = () => {
                 </li>
 
                 <li
+                    className="cursor-pointer px-3 py-2 rounded hover:bg-pink-100 hover:text-pink-600"
+                    onClick={() => navigate('/admin/testimonials')}
+                >
+                    Testimonials
+                </li>
+
+                <li
                     className="cursor-pointer px-3 py-2 rounded mt-6 bg-pink-500 text-white text-center hover:bg-pink-600"
                     onClick={handleLogout}
                 >

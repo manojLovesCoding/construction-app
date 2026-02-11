@@ -9,9 +9,10 @@ import { apiUrl } from "../common/http";
 import LatestServices from "../common/LatestServices";
 import LatestProjects from "../common/LatestProjects";
 import LatestArticles from "../common/LatestArticles.JSX";
+import LatestTestimonials from "../common/LatestTestimonials";
 
 const Home = () => {
-  
+
 
   return (
     <>
@@ -57,10 +58,13 @@ const Home = () => {
         <About />
 
         {/* Services Section */}
-        <LatestServices/>
+        <LatestServices />
 
         {/* Projects Section */}
         <LatestProjects />
+
+        {/* Testimonials Section */}
+        <LatestTestimonials limit={4} />
 
         {/* Articles Section */}
         <LatestArticles />
