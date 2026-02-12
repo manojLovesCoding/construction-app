@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\ArticleController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\admin\MemberController;
 use App\Http\Controllers\admin\ProjectController;
 use App\Http\Controllers\admin\ServiceController;
 use App\Http\Controllers\admin\TempImageController;
@@ -61,7 +62,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('testimonials/{id}', [TestimonialController::class, 'update']);
     Route::delete('testimonials/{id}', [TestimonialController::class, 'destroy']);
 
-
+    //member routes
+    Route::post('members', [MemberController::class, 'store']);
 
 
     //temp image upload route
