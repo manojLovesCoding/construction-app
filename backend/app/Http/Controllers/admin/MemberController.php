@@ -75,7 +75,59 @@ class MemberController extends Controller
     }
 
     //this method will update the member
-    public function update(Request $request) {}
+    public function update($id, Request $request)
+    {
+
+        $member = Member::find($id);
+        if ($member == null) {
+            return response()->json(['status' => false, 'message' => 'Member not found']);
+        }
+
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'job_title' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, "errors" => $validator->errors()]);
+        }
+
+        $member->name = $request->name;
+        $member->job_title = $request->job_title;
+        $member->linkedin_url = $request->linkedin_url;
+        $member->status = $request->status;
+        $member->save();
+
+        //save temp images to member
+        if ($request->imageId > 0) {
+            $tempImage = TempImage::find($request->imageId);
+            if ($tempImage != null) {
+                //delete old image
+                if (File::exists(public_path('uploads/members/' . $member->image))) {
+                    File::delete(public_path('uploads/members/' . $member->image));
+                }
+
+                $extArray = explode('.', $tempImage->name);
+                $ext = last($extArray);
+
+                $fileName = strtotime('now') . $member->id . '.' . $ext;
+
+                //create small thumbnail here
+                $sourcePath = public_path('uploads/temp/' . $tempImage->name);
+                $destPath = public_path('uploads/members/' . $fileName);
+                $manager = new ImageManager(Driver::class);
+                $image = $manager->read($sourcePath);
+                $image->coverDown(400, 500);
+                $image->save($destPath);
+
+                $member->image = $fileName;
+                $member->save();
+            }
+        }
+
+        return response()->json(['status' => true, 'message' => 'Member updated successfully']);
+    }
 
     //this method will delete the member
     public function destroy() {}
