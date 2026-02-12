@@ -65,7 +65,14 @@ class MemberController extends Controller
     }
 
     //this method will return single member
-    public function show() {}
+    public function show($id)
+    {
+        $member = Member::find($id);
+        if ($member == null) {
+            return response()->json(['status' => false, 'message' => 'Member not found']);
+        }
+        return response()->json(['status' => true, 'member' => $member]);
+    }
 
     //this method will update the member
     public function update(Request $request) {}
