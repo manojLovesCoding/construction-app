@@ -14,7 +14,11 @@ use Intervention\Image\ImageManager;
 class MemberController extends Controller
 {
     //this function will return all members to the admin panel
-    public function index() {}
+    public function index()
+    {
+        $members = Member::orderBy('created_at', 'desc')->get();
+        return response()->json(['status' => true, 'members' => $members]);
+    }
 
     //this function will return the view of creating a new member
     public function store(Request $request)
