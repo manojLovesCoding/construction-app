@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import Hero from '../common/Hero';
@@ -6,6 +7,7 @@ import { apiUrl, fileUrl } from '../common/http';
 
 function Services() {
     const [services, setServices] = useState([]);
+    const navigate = useNavigate();
 
     const fetchAllServices = async () => {
         try {
@@ -73,7 +75,10 @@ function Services() {
                                         <p className="text-gray-600 mb-4">
                                             {service.short_desc}
                                         </p>
-                                        <button className="text-pink-600 font-semibold hover:text-pink-700 transition">
+                                        <button
+                                            onClick={() => navigate(`/services/${service.id}`)}
+                                            className="text-pink-600 font-semibold hover:text-pink-700 transition"
+                                        >
                                             Learn More →
                                         </button>
                                     </div>
