@@ -11,11 +11,13 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\front\ProjectController as FrontProjectController;
 use App\Http\Controllers\front\ServiceController as FrontServiceController;
 use App\Http\Controllers\front\ArticleController as FrontArticleController;
+use App\Http\Controllers\front\ContactController;
 use App\Http\Controllers\front\TestimonialController as FrontTestimonialController;
 use App\Http\Controllers\front\MemberController as FrontMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('authenticate', [AuthenticationController::class, 'authenticate']);
+Route::post('contact-now', [ContactController::class, 'index']);
 
 Route::get('get-services', [FrontServiceController::class, 'index']);
 Route::get('get-latest-services', [FrontServiceController::class, 'latestServices']);

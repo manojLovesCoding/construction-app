@@ -5,3 +5,8 @@ PS C:\xampp\htdocs\construction\construction-app\backend> php artisan db:seed
 PS C:\xampp\htdocs\construction\construction-app\backend> php artisan make:controller admin\DashboardController
 
    INFO  Controller [C:\xampp\htdocs\construction\construction-app\backend\app\Http\Controllers\admin\DashboardController.php] created successfully.
+
+
+C:\xampp\htdocs\construction-app\backend>php artisan make:mail ContactEmail
+
+   INFO  Mailable [C:\xampp\htdocs\construction-app\backend\app\Mail\ContactEmail.php] created successfully.
