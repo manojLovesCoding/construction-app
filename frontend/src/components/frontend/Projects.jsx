@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import Hero from '../common/Hero';
@@ -6,6 +7,7 @@ import { apiUrl, fileUrl } from '../common/http';
 
 function Projects() {
     const [projects, setProjects] = useState([]);
+    const navigate = useNavigate();
 
     const fetchAllProjects = async () => {
         try {
@@ -54,19 +56,20 @@ function Projects() {
                             projects.map((project) => (
                                 <div
                                     key={project.id}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden group"
+                                    className="bg-white rounded-lg shadow-md overflow-hidden group cursor-pointer"
+                                    onClick={() => navigate(`/projects/${project.id}`)}
                                 >
                                     <div className="relative">
                                         <img
                                             src={
                                                 project.image
                                                     ? `${fileUrl}uploads/projects/small/${project.image}`
-                                                    : '/default-project.jpg' // fallback image
+                                                    : '/default-project.jpg'
                                             }
                                             alt={project.title}
                                             className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
-                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition"></div>
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition"></div>
                                     </div>
 
                                     <div className="p-6">
@@ -76,7 +79,13 @@ function Projects() {
                                         <p className="text-gray-600 mb-4">
                                             {project.short_desc || 'No description available.'}
                                         </p>
-                                        <button className="text-blue-600 font-semibold hover:text-blue-700 transition">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // prevent triggering parent click
+                                                navigate(`/projects/${project.id}`);
+                                            }}
+                                            className="text-blue-600 font-semibold hover:text-blue-700 transition"
+                                        >
                                             Learn More →
                                         </button>
                                     </div>
