@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import Hero from '../common/Hero';
@@ -6,6 +7,7 @@ import { apiUrl, fileUrl } from '../common/http';
 
 function Blog() {
     const [articles, setArticles] = useState([]);
+    const navigate = useNavigate();
 
     const fetchAllArticles = async () => {
         try {
@@ -79,12 +81,13 @@ function Blog() {
                                                 : 'No content available.'}
                                         </p>
 
-                                        <a
-                                            href={`/articles/${article.slug}`}
+                                        {/* Updated Button for Dynamic Navigation */}
+                                        <button
+                                            onClick={() => navigate(`/blogs/${article.id}`)}
                                             className="text-blue-600 font-semibold hover:text-blue-700 transition"
                                         >
                                             Read More →
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             ))

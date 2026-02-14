@@ -34,4 +34,22 @@ class ArticleController extends Controller
             'data' => $articles
         ]);
     }
+
+    // this method will return a single active article by ID
+    public function show($id)
+    {
+        $article = Article::where('status', 1)->find($id);
+
+        if (!$article) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Article not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $article
+        ]);
+    }
 }

@@ -14,6 +14,7 @@ import ContactUs from './components/frontend/ContactUs';
 import Testimonials from './components/frontend/Testimonials';
 import ServiceDetail from './components/frontend/ServiceDetails';
 import ProjectDetail from './components/frontend/ProjectDetail';
+import BlogDetail from './components/frontend/BlogDetail';
 
 // Backend Pages
 import Login from './components/backend/Login';
@@ -24,6 +25,7 @@ import { default as ShowProjects } from './components/backend/projects/Show';
 import { default as ShowArticles } from './components/backend/articles/Show';
 import { default as ShowTestimonials } from './components/backend/testimonials/Show';
 import { default as ShowMembers } from './components/backend/members/Show';
+
 
 
 
@@ -39,8 +41,9 @@ function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
         <Route path="/projects" element={<Projects />} />
-          <Route path="/projects/:id" element={<ProjectDetail />} />
+        <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/blogs" element={<Blog />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/testimonials" element={<Testimonials />} />
 
