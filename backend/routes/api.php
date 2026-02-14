@@ -12,6 +12,7 @@ use App\Http\Controllers\front\ProjectController as FrontProjectController;
 use App\Http\Controllers\front\ServiceController as FrontServiceController;
 use App\Http\Controllers\front\ArticleController as FrontArticleController;
 use App\Http\Controllers\front\TestimonialController as FrontTestimonialController;
+use App\Http\Controllers\front\MemberController as FrontMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('authenticate', [AuthenticationController::class, 'authenticate']);
@@ -26,6 +27,9 @@ Route::get('get-latest-articles', [FrontArticleController::class, 'latestArticle
 
 Route::get('get-testimonials', [FrontTestimonialController::class, 'index']);
 Route::get('get-latest-testimonials', [FrontTestimonialController::class, 'latestTestimonials']);
+
+Route::get('get-members', [FrontMemberController::class, 'index']);
+Route::get('get-latest-members', [FrontMemberController::class, 'latestMembers']);
 
 
 

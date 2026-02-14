@@ -3,6 +3,7 @@ import Header from "../common/Header";
 import { default as AboutNew } from "../common/About";
 import Hero from "../common/Hero";
 import LatestTestimonials from "../common/LatestTestimonials";
+import LatestMember from "../common/LatestMembers";
 
 const About = () => {
   return (
@@ -14,6 +15,8 @@ const About = () => {
           text="We offer a diverse array of construction services, spanning residential, commercial, and industrial projects." />
 
         <AboutNew />
+
+        <LatestMember/>
 
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-6">

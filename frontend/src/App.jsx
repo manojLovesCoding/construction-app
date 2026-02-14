@@ -16,6 +16,7 @@ import { default as ShowServices } from './components/backend/services/Show';
 import { default as ShowProjects } from './components/backend/projects/Show';
 import { default as ShowArticles } from './components/backend/articles/Show';
 import { default as ShowTestimonials } from './components/backend/testimonials/Show';
+import { default as ShowMembers } from './components/backend/members/Show';
 import Testimonials from './components/frontend/Testimonials';
 function App() {
   const [count, setCount] = useState(0)
@@ -42,7 +43,8 @@ function App() {
             <RequireAuth><ShowArticles /></RequireAuth>} />
           <Route path='/admin/testimonials' element={
             <RequireAuth><ShowTestimonials /></RequireAuth>} />
-            
+          <Route path='/admin/members' element={
+            <RequireAuth><ShowMembers /></RequireAuth>} />
         </Routes>
       </BrowserRouter>
     </>
